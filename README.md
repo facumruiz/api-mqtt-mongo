@@ -1,37 +1,38 @@
-# mern-stack-example
-Mern Stack code for the [Mern Tutorial](https://www.mongodb.com/languages/mern-stack-tutorial)
-
-[![CI](https://github.com/mongodb-developer/mern-stack-example/actions/workflows/main.yaml/badge.svg)](https://github.com/mongodb-developer/mern-stack-example/actions/workflows/main.yaml)
+# api-mqtt-mongo
 
 ## How To Run
-Create the file `mern/server/.env` with your Atlas URI and the server port:
+Create the file `.env` in the root directory of your project. The file should look like this:
 ```
-ATLAS_URI=mongodb+srv://<username>:<password>@sandbox.jadwj.mongodb.net/<dbname>?retryWrites=true&w=majority
+# Port where the API will run
+PORT=3000
 
-PORT=5050
+# URI for connecting to the MongoDB database (MongoDB Atlas or similar)
+MONGO_URI=mongodb+srv://<username>:<password>@cluster0.oj1uh.mongodb.net/mqtt?retryWrites=true&w=majority
 
-JWT_SECRET=<your_jwt_secret>
+# MQTT broker URL (you can change this to any public or private broker)
+MQTT_BROKER=mqtt://broker.hivemq.com:1883
 
-EMAIL_USER=<your_email>
-EMAIL_PASS=<your_email_password>
-FRONT_URL=<your_front_url>
-BACKEND_URL=<your_backend_url>
+# MQTT topic to which the client will subscribe and publish messages
+MQTT_TOPIC=topico/lecturas
 ```
 
 Start server:
 ```
-cd mern/server
 npm install
-npm start
+node index
 ```
 
-Start Web server
+## 📝 Testing the MQTT Topic
+In the test/mqttTest.js file, you’ll find a script to help you publish and test messages on the MQTT topic. You can use this script to test if your application can successfully publish messages to the broker and subscribe to the topic.
+
+To run the test script:
+1. Make sure your .env file is configured correctly.
+2. Run the test script with the following command:
+
 ```
-cd mern/client
-npm install
-npm run dev
+node test/mqttTest.js
 ```
 
-## Disclaimer
+This will allow you to send messages to the MQTT topic and verify that everything is working as expected.
 
-Use at your own risk; not a supported MongoDB product
+
