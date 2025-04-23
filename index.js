@@ -4,5 +4,6 @@ import { startMqttListener } from './mqtt/mqttListener.js';
 
 dotenv.config();
 
+
 startApi();
 startMqttListener();

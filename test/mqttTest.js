@@ -1,6 +1,6 @@
 import mqtt from 'mqtt';
 
-const brokerUrl = 'mqtt://broker.emqx.io:1883'; // 👈 Funciona sin user/pass
+const brokerUrl = 'mqtt://localhost:1883'; // 👈 Funciona sin user/pass
 
 const client = mqtt.connect(brokerUrl); // Sin auth
 
