@@ -1,17 +1,18 @@
 import mqtt from 'mqtt';
-import { broker, topic } from '../config/mqttConfig.js';
+import { broker, topic, mqttOptions, collectionName } from '../config/mqttConfig.js';
 import { connectToMongo } from './mongoService.js';
+
 
 export async function startMqttListener() {
   let collection;
 
   try {
-    collection = await connectToMongo();
+    collection = await connectToMongo(collectionName);
   } catch {
     return;
   }
 
-  const client = mqtt.connect(broker);
+  const client = mqtt.connect(broker, mqttOptions);
 
   client.on('connect', () => {
     console.log('🔌 Conectado al broker MQTT');
@@ -38,5 +39,9 @@ export async function startMqttListener() {
     } catch (error) {
       console.error('❌ Error al guardar mensaje en MongoDB:', error.message);
     }
+  });
+
+  client.on('error', (error) => {
+    console.error('❌ Error de conexión MQTT:', error.message);
   });
 }

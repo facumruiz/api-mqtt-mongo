@@ -11,14 +11,19 @@ Create the file `.env` in the root directory of your project. The file should lo
 # Port where the API will run
 PORT=3000
 
-# URI for connecting to the MongoDB database (MongoDB Atlas or similar)
-MONGO_URI=mongodb+srv://<username>:<password>@cluster0.oj1uh.mongodb.net/mqtt?retryWrites=true&w=majority
+# MongoDB connection URI (replace <USERNAME>, <PASSWORD>, <CLUSTER> and <DB_NAME> accordingly)
+MONGO_URI=mongodb+srv://<USERNAME>:<PASSWORD>@<CLUSTER>.mongodb.net/<DB_NAME>?retryWrites=true&w=majority
 
-# MQTT broker URL (you can change this to any public or private broker)
-MQTT_BROKER=mqtt://broker.hivemq.com:1883
+# MQTT broker configuration
+MQTT_BROKER=mqtts://<BROKER_IP>:8883
+MQTT_TOPIC=facu/lecturas
 
-# MQTT topic to which the client will subscribe and publish messages
-MQTT_TOPIC=topico/lecturas
+# Path to the CA certificate for secure MQTT connection
+MQTT_CA_PATH=certs/ca.crt
+
+# MongoDB database and collection names
+DB_NAME=mqtt
+MQTT_COLLECTION=lecturas
 ```
 
 Start server:
@@ -42,35 +47,4 @@ This will allow you to send messages to the MQTT topic and verify that everythin
 
 
 
-## 🦟 Broker Mosquitto
-
-Before you start, make sure you have the following installed:
-
-- [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/)  
-  > ✅ Docker must be properly installed and running on your system.  
-  > You can verify it by running:  
-  > ```bash
-  > docker --version
-  > docker-compose --version
-  > ```
-
-```
-docker-compose up -d
-```
-
-### 📜 Logs:
-You can view the broker logs to ensure it's running correctly:
-```
-docker logs -f api-mqtt-mongo-mosquitto-1
-```
-
-
-```
-1745425260: mosquitto version 2.0.21 starting
-1745425260: Config loaded from /mosquitto/config/mosquitto.conf.
-1745425260: Opening ipv4 listen socket on port 1883.
-1745425260: Opening ipv6 listen socket on port 1883.
-1745425260: mosquitto version 2.0.21 running
-1745425265: New connection from 172.19.0.1:55264 on port 1883.
-```
 
