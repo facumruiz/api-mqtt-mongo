@@ -1,4 +1,7 @@
 node_modules/
 config.env
 .env
+docker-compose.yml
+mosquitto/
+certs/
 vercel.json
