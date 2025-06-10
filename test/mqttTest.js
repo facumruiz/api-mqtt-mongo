@@ -1,7 +1,7 @@
 import mqtt from 'mqtt';
 import fs from 'fs';
 
-const brokerUrl = 'mqtts://52.14.253.32:8883'; // MQTT sobre TLS
+const brokerUrl = 'mqtts://3.132.251.70'; // MQTT sobre TLS
 
 // Ruta fija al certificado CA
 const caPath = '../certs/ca.crt';
@@ -14,21 +14,22 @@ const mqttOptions = {
 const client = mqtt.connect(brokerUrl, mqttOptions);
 
 const topic = 'facu/lecturas';
-const mensaje = JSON.stringify({
-  sensor: 'rfid',
-  uid: 'FACU12345678',
-  timestamp: new Date().toISOString(),
-});
+const testMessages = [
+  { topic: "dispositivo/temperatura", message: JSON.stringify({ temp: 25, unidad: 'C' }) },
+  { topic: "dispositivo/humedad", message: JSON.stringify({ humedad: 60, unidad: '%' }) },
+  { topic: "dispositivo/relay1", message: 'Relay 1 ON' },
+  { topic: "dispositivo/relay2", message: 'Relay 2 OFF' },
+  { topic: "dispositivo/relay3", message: 'Relay 3 ON' },
+];
 
-client.on('connect', () => {
-  console.log(`✅ Conectado al broker EMQX: ${brokerUrl}`);
-  client.publish(topic, mensaje, (err) => {
+
+testMessages.forEach(({ topic, message }) => {
+  client.publish(topic, message, {}, (err) => {
     if (err) {
-      console.error('❌ Error al publicar:', err);
+      console.error(`❌ Error al publicar en ${topic}:`, err.message);
     } else {
-      console.log(`📤 Mensaje publicado en '${topic}':`, mensaje);
+      console.log(`📤 Mensaje enviado a ${topic}: ${message}`);
     }
-    client.end();
   });
 });
 
