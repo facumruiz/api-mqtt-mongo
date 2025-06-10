@@ -1,14 +1,14 @@
 import mqtt from 'mqtt';
-import { broker, topic, mqttOptions, collectionName } from '../config/mqttConfig.js';
+import { broker, topicTemp, topicHum, topicR1, topicR2, topicR3, mqttOptions, collectionName } from '../config/mqttConfig.js';
 import { connectToMongo } from './mongoService.js';
-
 
 export async function startMqttListener() {
   let collection;
 
   try {
     collection = await connectToMongo(collectionName);
-  } catch {
+  } catch (error) {
+    console.error('❌ Error al conectar a MongoDB:', error.message);
     return;
   }
 
@@ -16,18 +16,23 @@ export async function startMqttListener() {
 
   client.on('connect', () => {
     console.log('🔌 Conectado al broker MQTT');
-    client.subscribe(topic, (err) => {
+
+    const topics = [topicTemp, topicHum, topicR1, topicR2, topicR3];
+
+    client.subscribe(topics, (err, granted) => {
       if (err) {
-        console.error('❌ Error al suscribirse al topic:', err.message);
+        console.error('❌ Error al suscribirse a los tópicos:', err.message);
       } else {
-        console.log(`📡 Suscrito al topic: ${topic}`);
+        granted.forEach(({ topic }) =>
+          console.log(`📡 Suscrito al tópico: ${topic}`)
+        );
       }
     });
   });
 
   client.on('message', async (topic, message) => {
     const payload = message.toString();
-    console.log(`📩 Mensaje recibido: ${payload}`);
+    console.log(`📩 Mensaje recibido en ${topic}: ${payload}`);
 
     try {
       const result = await collection.insertOne({
