@@ -4,6 +4,22 @@ Before you start, make sure you have the following installed:
 
 - [Node.js](https://nodejs.org/) (v18 or higher)
 
+## 🚀 Release v3 – MQTT API Endpoints
+
+This release includes:
+
+- ✅ GET endpoint /api/getMessages to retrieve all messages stored from MQTT.
+- ✅ POST endpoint /api/publish to send test messages to the allowed topics.
+- 🔒 Strict topic validation to prevent errors or misuse.
+
+Allowed topics:
+- dispositivo/temperatura
+- dispositivo/humedad
+- dispositivo/relay1
+- dispositivo/relay2
+- dispositivo/relay3
+
+This version is ideal for testing, debugging, and validating MQTT communication via REST API.
 
 ## How To Run
 Create the file `.env` in the root directory of your project. The file should look like this:
@@ -32,16 +48,7 @@ npm install
 node index
 ```
 
-## 📝 Testing the MQTT Topic
-In the test/mqttTest.js file, you’ll find a script to help you publish and test messages on the MQTT topic. You can use this script to test if your application can successfully publish messages to the broker and subscribe to the topic.
 
-To run the test script:
-1. Make sure your .env file is configured correctly.
-2. Run the test script with the following command:
-
-```
-node test/mqttTest.js
-```
 
 This will allow you to send messages to the MQTT topic and verify that everything is working as expected.
 
