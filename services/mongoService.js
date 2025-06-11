@@ -1,5 +1,6 @@
 import { MongoClient } from 'mongodb';
 import { mongoUri, dbName, collectionName } from '../config/mqttConfig.js';
+const PORT = process.env.PORT || 3000;
 
 let mongoClient;
 let collection;
