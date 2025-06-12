@@ -12,7 +12,28 @@ export const dbName = process.env.DB_NAME;
 export const collectionName = process.env.MQTT_COLLECTION;
 export const mongoUri = process.env.MONGO_URI;
 
+// Obtener certificado CA desde base64 o desde archivo
+let caCert;
+
+if (process.env.MQTT_CA_CERT_BASE64) {
+  try {
+    caCert = Buffer.from(process.env.MQTT_CA_CERT_BASE64, 'base64');
+    console.log('[MQTT] Certificado CA cargado desde variable de entorno base64');
+  } catch (err) {
+    console.error('[MQTT] Error al decodificar certificado base64:', err);
+  }
+} else if (process.env.MQTT_CA_PATH) {
+  try {
+    caCert = fs.readFileSync(process.env.MQTT_CA_PATH);
+    console.log('[MQTT] Certificado CA cargado desde archivo local');
+  } catch (err) {
+    console.error('[MQTT] Error al leer el archivo CA:', err);
+  }
+} else {
+  console.warn('[MQTT] No se especificó un certificado CA');
+}
+
 export const mqttOptions = {
-  ca: fs.readFileSync(process.env.MQTT_CA_PATH),
+  ca: caCert,
   rejectUnauthorized: true,
 };
