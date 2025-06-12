@@ -1,7 +1,9 @@
 import express from 'express';
 import { connectToMongo } from '../services/mongoService.js';
 import { collectionName } from '../config/mqttConfig.js';
-import { broker, topicTemp, topicHum, topicR1, topicR2, topicR3, mqttOptions } from '../config/mqttConfig.js';
+import { broker, mqttOptions } from '../config/mqttConfig.js';
+
+import { startMqttListener, stopMqttListener, getMqttListenerStatus } from '../services/mqttListener.js';
 
 const router = express.Router();
 
@@ -68,6 +70,27 @@ router.post('/publish', async (req, res) => {
     }
 });
 
+// ✅ POST /api/activate
+router.post('/activate', (req, res) => {
+    const { state } = req.body;
 
+    if (!state || (state !== 'on' && state !== 'off')) {
+        return res.status(400).json({ error: 'Estado inválido. Usa "on" o "off"' });
+    }
+
+    if (state === 'on') {
+        startMqttListener();
+        return res.status(200).json({ message: '🔛 Listener activado' });
+    } else {
+        stopMqttListener();
+        return res.status(200).json({ message: '🔴 Listener desactivado' });
+    }
+});
+
+// ✅ GET /api/status
+router.get('/status', (req, res) => {
+    const status = getMqttListenerStatus() ? 'on' : 'off';
+    res.status(200).json({ status });
+});
 
 export default router;
