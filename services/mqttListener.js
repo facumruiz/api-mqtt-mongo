@@ -1,52 +1,53 @@
+// services/mqttListener.js
 import mqtt from 'mqtt';
-import { broker, topicTemp, topicHum, topicR1, topicR2, topicR3, mqttOptions, collectionName } from '../config/mqttConfig.js';
+import { broker, mqttOptions, topicTemp, topicHum, topicR1, topicR2, topicR3 } from '../config/mqttConfig.js';
 import { connectToMongo } from './mongoService.js';
+import { collectionName } from '../config/mqttConfig.js';
 
-export async function startMqttListener() {
-  let collection;
+let client = null;
+let isActive = false;
 
-  try {
-    collection = await connectToMongo(collectionName);
-  } catch (error) {
-    console.error('❌ Error al conectar a MongoDB:', error.message);
-    return;
-  }
-
-  const client = mqtt.connect(broker, mqttOptions);
-
-  client.on('connect', () => {
-    console.log('🔌 Conectado al broker MQTT');
-
-    const topics = [topicTemp, topicHum, topicR1, topicR2, topicR3];
-
-    client.subscribe(topics, (err, granted) => {
-      if (err) {
-        console.error('❌ Error al suscribirse a los tópicos:', err.message);
-      } else {
-        granted.forEach(({ topic }) =>
-          console.log(`📡 Suscrito al tópico: ${topic}`)
-        );
-      }
-    });
-  });
-
-  client.on('message', async (topic, message) => {
-    const payload = message.toString();
-    console.log(`📩 Mensaje recibido en ${topic}: ${payload}`);
-
-    try {
-      const result = await collection.insertOne({
-        topic,
-        mensaje: payload,
-        timestamp: new Date(),
-      });
-      console.log(`✅ Mensaje guardado con ID: ${result.insertedId}`);
-    } catch (error) {
-      console.error('❌ Error al guardar mensaje en MongoDB:', error.message);
+export function startMqttListener() {
+    if (isActive) {
+        console.log('⚠️ MQTT Listener ya está activo');
+        return;
     }
-  });
 
-  client.on('error', (error) => {
-    console.error('❌ Error de conexión MQTT:', error.message);
-  });
+    client = mqtt.connect(broker, mqttOptions);
+
+    client.on('connect', () => {
+        console.log('🔌 Conectado a MQTT Broker');
+        client.subscribe([topicTemp, topicHum, topicR1, topicR2, topicR3], (err) => {
+            if (!err) {
+                console.log('✅ Subscripción a los tópicos MQTT');
+            }
+        });
+    });
+
+    client.on('message', async (topic, message) => {
+        const collection = await connectToMongo(collectionName);
+        await collection.insertOne({
+            topic,
+            message: message.toString(),
+            timestamp: new Date()
+        });
+        console.log(`📥 Mensaje recibido [${topic}]: ${message}`);
+    });
+
+    isActive = true;
+}
+
+export function stopMqttListener() {
+    if (client && isActive) {
+        client.end(() => {
+            console.log('🛑 MQTT Listener detenido');
+        });
+        isActive = false;
+    } else {
+        console.log('⚠️ MQTT Listener ya está detenido');
+    }
+}
+
+export function getMqttListenerStatus() {
+    return isActive;
 }
