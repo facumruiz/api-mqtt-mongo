@@ -17,13 +17,56 @@ const allowedTopics = [
   "dispositivo/relay3",
 ];
 
-// GET /api/getMessages
+import { ObjectId } from 'mongodb'; 
+
+// GET /api/getMessages con filtros y paginación
 router.get('/getMessages', async (req, res) => {
   try {
     const collection = await connectToMongo(collectionName);
-    const messages = await collection.find({}).toArray();
-    res.status(200).json(messages);
-    console.log("✅ GET all messages with /api/getMessages")
+
+    const {
+      sensorType,
+      deviceName,
+      topic,
+      timestampFrom,
+      timestampTo,
+      page = 1,
+      limit = 10
+    } = req.query;
+
+    const filter = {};
+
+    if (sensorType) filter.sensorType = sensorType;
+    if (deviceName) filter.deviceName = deviceName;
+    if (topic) filter.topic = topic;
+
+    if (timestampFrom || timestampTo) {
+      filter.timestamp = {};
+      if (timestampFrom) filter.timestamp.$gte = new Date(timestampFrom);
+      if (timestampTo) filter.timestamp.$lte = new Date(timestampTo);
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const options = {
+      skip,
+      limit: parseInt(limit),
+      sort: { timestamp: -1 }
+    };
+
+    const [messages, total] = await Promise.all([
+      collection.find(filter, options).toArray(),
+      collection.countDocuments(filter)
+    ]);
+
+    res.status(200).json({
+      page: parseInt(page),
+      limit: parseInt(limit),
+      total,
+      totalPages: Math.ceil(total / limit),
+      data: messages
+    });
+
+    console.log(`✅ GET messages with filters and pagination`);
   } catch (error) {
     console.error('❌ Error al obtener los mensajes:', error.message);
     res.status(500).json({ error: 'Error al obtener los mensajes' });
